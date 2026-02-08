@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { LogoEmblem } from "./LogoEmblem";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Play, Users } from "lucide-react";
+import { Sparkles, Play } from "lucide-react";
 
 interface HeroSectionProps {
   onStartQuiz: () => void;
@@ -102,9 +102,9 @@ export function HeroSection({ onStartQuiz }: HeroSectionProps) {
           An Interschool Academic Competition
         </motion.p>
 
-        {/* CTA Buttons */}
+        {/* CTA Button */}
         <motion.div
-          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          className="flex items-center justify-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
@@ -117,11 +117,6 @@ export function HeroSection({ onStartQuiz }: HeroSectionProps) {
           >
             <Play className="w-5 h-5 transition-transform group-hover:scale-110" />
             Start Quiz
-          </Button>
-
-          <Button variant="outline" size="lg">
-            <Users className="w-5 h-5" />
-            View Teams
           </Button>
         </motion.div>
       </div>

@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { QuizBoard } from "./QuizBoard";
 import { QuestionDisplay } from "./QuestionDisplay";
 import { QuizTimer } from "./QuizTimer";
-import { TeamScore } from "./TeamScore";
 import { LogoEmblem } from "./LogoEmblem";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Eye, EyeOff, SkipForward, Check } from "lucide-react";
@@ -56,21 +55,12 @@ const sampleCategories = [
   },
 ];
 
-const sampleTeams = [
-  { id: "team1", name: "Phoenix Academy", score: 0, color: "#F59E0B" },
-  { id: "team2", name: "Blue Ridge School", score: 0, color: "#3B82F6" },
-  { id: "team3", name: "Green Valley High", score: 0, color: "#10B981" },
-  { id: "team4", name: "Silver Oak Institute", score: 0, color: "#8B5CF6" },
-];
-
 interface QuizInterfaceProps {
   onBack: () => void;
 }
 
 export function QuizInterface({ onBack }: QuizInterfaceProps) {
   const [categories, setCategories] = useState(sampleCategories);
-  const [teams, setTeams] = useState(sampleTeams);
-  const [activeTeamIndex, setActiveTeamIndex] = useState(0);
   const [selectedQuestion, setSelectedQuestion] = useState<{
     categoryId: string;
     questionId: string;
@@ -112,16 +102,8 @@ export function QuizInterface({ onBack }: QuizInterfaceProps) {
     setTimerRunning(false);
   };
 
-  const handleAwardPoints = (correct: boolean) => {
+  const handleNextQuestion = () => {
     if (!selectedQuestion) return;
-
-    if (correct) {
-      setTeams(prev => prev.map((team, index) => 
-        index === activeTeamIndex 
-          ? { ...team, score: team.score + selectedQuestion.points }
-          : team
-      ));
-    }
 
     // Mark question as answered
     setCategories(prev => prev.map(cat => 
@@ -137,9 +119,6 @@ export function QuizInterface({ onBack }: QuizInterfaceProps) {
         : cat
     ));
 
-    // Move to next team
-    setActiveTeamIndex(prev => (prev + 1) % teams.length);
-    
     // Clear selection
     setSelectedQuestion(null);
     setShowAnswer(false);
@@ -170,107 +149,88 @@ export function QuizInterface({ onBack }: QuizInterfaceProps) {
       </header>
 
       {/* Main content */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Quiz Board - Takes 3 columns on large screens */}
-        <div className="lg:col-span-3 space-y-6">
-          <AnimatePresence mode="wait">
-            {selectedQuestion ? (
-              <motion.div
-                key="question"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="space-y-6"
-              >
-                {/* Timer and controls */}
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6 glass rounded-2xl p-6">
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm text-muted-foreground">Current Team:</span>
-                    <span className="font-display text-xl font-bold text-primary">
-                      {teams[activeTeamIndex].name}
-                    </span>
-                  </div>
-
-                  <QuizTimer
-                    duration={timerDuration}
-                    isRunning={timerRunning}
-                    onTimeUp={handleTimeUp}
-                  />
-
-                  <div className="flex gap-3">
-                    <Button
-                      variant={showAnswer ? "quizCorrect" : "outline"}
-                      onClick={handleRevealAnswer}
-                      disabled={showAnswer}
-                    >
-                      {showAnswer ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                      {showAnswer ? "Revealed" : "Reveal Answer"}
-                    </Button>
-                  </div>
+      <div className="max-w-5xl mx-auto">
+        <AnimatePresence mode="wait">
+          {selectedQuestion ? (
+            <motion.div
+              key="question"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="space-y-6"
+            >
+              {/* Timer and controls */}
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6 glass rounded-2xl p-6">
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-muted-foreground">Category:</span>
+                  <span className="font-display text-xl font-bold text-primary">
+                    {selectedQuestion.category}
+                  </span>
                 </div>
 
-                {/* Question display */}
-                <QuestionDisplay
-                  question={selectedQuestion.question}
-                  options={selectedQuestion.options}
-                  answer={selectedQuestion.answer}
-                  showAnswer={showAnswer}
-                  selectedOption={selectedOption}
-                  onSelectOption={setSelectedOption}
-                  correctOptionIndex={selectedQuestion.correctIndex}
-                  category={selectedQuestion.category}
-                  points={selectedQuestion.points}
+                <QuizTimer
+                  duration={timerDuration}
+                  isRunning={timerRunning}
+                  onTimeUp={handleTimeUp}
                 />
 
-                {/* Award buttons */}
-                {showAnswer && (
-                  <motion.div
-                    className="flex justify-center gap-4"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                <div className="flex gap-3">
+                  <Button
+                    variant={showAnswer ? "quizCorrect" : "outline"}
+                    onClick={handleRevealAnswer}
+                    disabled={showAnswer}
                   >
-                    <Button
-                      variant="quizCorrect"
-                      size="lg"
-                      onClick={() => handleAwardPoints(true)}
-                    >
-                      <Check className="w-5 h-5" />
-                      Correct (+{selectedQuestion.points})
-                    </Button>
-                    <Button
-                      variant="quizIncorrect"
-                      size="lg"
-                      onClick={() => handleAwardPoints(false)}
-                    >
-                      <SkipForward className="w-5 h-5" />
-                      Incorrect / Skip
-                    </Button>
-                  </motion.div>
-                )}
-              </motion.div>
-            ) : (
-              <motion.div
-                key="board"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <QuizBoard
-                  categories={categories}
-                  onSelectQuestion={handleSelectQuestion}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                    {showAnswer ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                    {showAnswer ? "Revealed" : "Reveal Answer"}
+                  </Button>
+                </div>
+              </div>
 
-        {/* Sidebar - Team scores */}
-        <div className="lg:col-span-1">
-          <TeamScore
-            teams={teams}
-            activeTeamId={teams[activeTeamIndex].id}
-          />
-        </div>
+              {/* Question display */}
+              <QuestionDisplay
+                question={selectedQuestion.question}
+                options={selectedQuestion.options}
+                answer={selectedQuestion.answer}
+                showAnswer={showAnswer}
+                selectedOption={selectedOption}
+                onSelectOption={setSelectedOption}
+                correctOptionIndex={selectedQuestion.correctIndex}
+                category={selectedQuestion.category}
+                points={selectedQuestion.points}
+              />
+
+              {/* Next question button */}
+              {showAnswer && (
+                <motion.div
+                  className="flex justify-center gap-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <Button
+                    variant="carnival"
+                    size="lg"
+                    onClick={handleNextQuestion}
+                  >
+                    <SkipForward className="w-5 h-5" />
+                    Next Question
+                  </Button>
+                </motion.div>
+              )}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="board"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <QuizBoard
+                categories={categories}
+                onSelectQuestion={handleSelectQuestion}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
