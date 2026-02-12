@@ -48,7 +48,7 @@ export function QuestionDisplay({
           )}
           {points && (
             <span className="px-4 py-1.5 rounded-full bg-accent/20 text-accent text-sm font-bold">
-              {points} Points
+              Q{points}
             </span>
           )}
         </motion.div>
