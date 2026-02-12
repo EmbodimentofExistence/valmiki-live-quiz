@@ -33,7 +33,7 @@ export function QuizInterface({ subjectId, subjectName, onBack }: QuizInterfaceP
   const [passCount, setPassCount] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [timerRunning, setTimerRunning] = useState(false);
-  const [timerDuration] = useState(30);
+  const [timerResetKey, setTimerResetKey] = useState(0);
 
   const handleSelectQuestion = useCallback((questionId: string) => {
     const question = questions.find(q => q.id === questionId);
@@ -45,8 +45,9 @@ export function QuizInterface({ subjectId, subjectName, onBack }: QuizInterfaceP
         number: question.number,
       });
       setShowAnswer(false);
-      setTimerRunning(true);
       setPassCount(0);
+      setTimerResetKey(prev => prev + 1);
+      setTimerRunning(true);
     }
   }, [questions]);
 
@@ -62,17 +63,18 @@ export function QuizInterface({ subjectId, subjectName, onBack }: QuizInterfaceP
     ));
     setSelectedQuestion(null);
     setShowAnswer(false);
+    setTimerRunning(false);
   };
 
   const handlePass = () => {
-    setTimerRunning(false);
     setPassCount(prev => prev + 1);
-    setTimeout(() => setTimerRunning(true), 100);
+    setTimerResetKey(prev => prev + 1);
+    setTimerRunning(true);
   };
 
   const handleTimeUp = () => {
+    // Timer expired — just stop. No auto-pass.
     setTimerRunning(false);
-    handlePass();
   };
 
   return (
@@ -106,14 +108,18 @@ export function QuizInterface({ subjectId, subjectName, onBack }: QuizInterfaceP
               exit={{ opacity: 0 }}
               className="space-y-6"
             >
-              {/* Timer and controls */}
               <div className="flex flex-col md:flex-row items-center justify-between gap-6 glass rounded-2xl p-6">
                 <div className="flex items-center gap-4">
                   <span className="text-sm text-muted-foreground">Subject:</span>
                   <span className="font-display text-xl font-bold text-primary">{subjectName}</span>
                 </div>
 
-                <QuizTimer duration={timerDuration} isRunning={timerRunning} onTimeUp={handleTimeUp} />
+                <QuizTimer
+                  duration={30}
+                  isRunning={timerRunning}
+                  resetKey={timerResetKey}
+                  onTimeUp={handleTimeUp}
+                />
 
                 <div className="flex gap-3">
                   <Button variant="outline" onClick={handlePass} disabled={showAnswer}>
@@ -161,7 +167,6 @@ export function QuizInterface({ subjectId, subjectName, onBack }: QuizInterfaceP
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              {/* Simple question number grid for the selected subject */}
               <div className="glass rounded-3xl p-6 md:p-8">
                 <h2 className="font-display text-2xl md:text-3xl font-bold text-center mb-8">
                   {subjectName} — <span className="text-gold-gradient">Select a Question</span>

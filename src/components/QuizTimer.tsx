@@ -1,25 +1,22 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 
 interface QuizTimerProps {
-  duration: number; // in seconds
+  duration: number;
   isRunning: boolean;
+  resetKey?: number;
   onTimeUp?: () => void;
-  onTick?: (remaining: number) => void;
 }
 
-export function QuizTimer({ duration, isRunning, onTimeUp, onTick }: QuizTimerProps) {
+export function QuizTimer({ duration, isRunning, resetKey = 0, onTimeUp }: QuizTimerProps) {
   const [remaining, setRemaining] = useState(duration);
-  const [key, setKey] = useState(0);
+  const timeUpCalled = useRef(false);
 
-  const reset = useCallback(() => {
-    setRemaining(duration);
-    setKey(prev => prev + 1);
-  }, [duration]);
-
+  // Reset timer when resetKey changes (new question or pass)
   useEffect(() => {
-    reset();
-  }, [duration, reset]);
+    setRemaining(duration);
+    timeUpCalled.current = false;
+  }, [resetKey, duration]);
 
   useEffect(() => {
     if (!isRunning || remaining <= 0) return;
@@ -27,62 +24,45 @@ export function QuizTimer({ duration, isRunning, onTimeUp, onTick }: QuizTimerPr
     const interval = setInterval(() => {
       setRemaining((prev) => {
         const next = prev - 1;
-        onTick?.(next);
-        if (next <= 0) {
-          onTimeUp?.();
-          clearInterval(interval);
+        if (next <= 0 && !timeUpCalled.current) {
+          timeUpCalled.current = true;
+          setTimeout(() => onTimeUp?.(), 0);
         }
-        return next;
+        return Math.max(next, 0);
       });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isRunning, remaining, onTimeUp, onTick]);
+  }, [isRunning, onTimeUp]);
 
   const progress = (remaining / duration) * 100;
   const isLow = remaining <= 10;
   const isCritical = remaining <= 5;
 
-  const circumference = 2 * Math.PI * 54; // radius = 54
+  const circumference = 2 * Math.PI * 54;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
     <div className="relative">
-      {/* Timer circle */}
       <motion.div
-        key={key}
+        key={resetKey}
         className="relative w-32 h-32"
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.4 }}
       >
         <svg className="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
-          {/* Background circle */}
-          <circle
-            cx="60"
-            cy="60"
-            r="54"
-            fill="none"
-            stroke="hsl(var(--muted))"
-            strokeWidth="8"
-          />
-          {/* Progress circle */}
+          <circle cx="60" cy="60" r="54" fill="none" stroke="hsl(var(--muted))" strokeWidth="8" />
           <motion.circle
-            cx="60"
-            cy="60"
-            r="54"
-            fill="none"
+            cx="60" cy="60" r="54" fill="none"
             stroke={isCritical ? "hsl(var(--quiz-incorrect))" : isLow ? "hsl(var(--accent))" : "hsl(var(--primary))"}
-            strokeWidth="8"
-            strokeLinecap="round"
+            strokeWidth="8" strokeLinecap="round"
             strokeDasharray={circumference}
             initial={{ strokeDashoffset: 0 }}
             animate={{ strokeDashoffset }}
             transition={{ duration: 0.3, ease: "linear" }}
           />
         </svg>
-
-        {/* Time display */}
         <div className="absolute inset-0 flex items-center justify-center">
           <AnimatePresence mode="wait">
             <motion.span
@@ -99,8 +79,6 @@ export function QuizTimer({ duration, isRunning, onTimeUp, onTick }: QuizTimerPr
             </motion.span>
           </AnimatePresence>
         </div>
-
-        {/* Pulse effect when low */}
         {isLow && (
           <motion.div
             className="absolute inset-0 rounded-full border-2 border-accent"
@@ -109,11 +87,7 @@ export function QuizTimer({ duration, isRunning, onTimeUp, onTick }: QuizTimerPr
           />
         )}
       </motion.div>
-
-      {/* Label */}
-      <p className="text-center mt-2 text-sm text-muted-foreground uppercase tracking-wider">
-        Seconds
-      </p>
+      <p className="text-center mt-2 text-sm text-muted-foreground uppercase tracking-wider">Seconds</p>
     </div>
   );
 }
