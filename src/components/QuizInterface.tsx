@@ -5,54 +5,24 @@ import { QuestionDisplay } from "./QuestionDisplay";
 import { QuizTimer } from "./QuizTimer";
 import { LogoEmblem } from "./LogoEmblem";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Eye, EyeOff, SkipForward, Check } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, SkipForward, FastForward } from "lucide-react";
 
-// Sample quiz data
+// Generate 20 placeholder questions per subject
+function generateQuestions(prefix: string, count: number = 20) {
+  return Array.from({ length: count }, (_, i) => ({
+    id: `${prefix}${i + 1}`,
+    number: i + 1,
+    answered: false,
+    question: `${prefix.toUpperCase()} Question ${i + 1}`,
+    answer: `Answer ${i + 1}`,
+  }));
+}
+
 const sampleCategories = [
-  {
-    id: "science",
-    name: "Science",
-    questions: [
-      { id: "s1", points: 100, answered: false, question: "What is the chemical symbol for Gold?", answer: "Au", options: ["Au", "Ag", "Fe", "Cu"], correctIndex: 0 },
-      { id: "s2", points: 200, answered: false, question: "Which planet is known as the Red Planet?", answer: "Mars", options: ["Venus", "Mars", "Jupiter", "Saturn"], correctIndex: 1 },
-      { id: "s3", points: 300, answered: false, question: "What is the powerhouse of the cell?", answer: "Mitochondria", options: ["Nucleus", "Ribosome", "Mitochondria", "Golgi Body"], correctIndex: 2 },
-      { id: "s4", points: 400, answered: false, question: "What is the speed of light in vacuum?", answer: "299,792 km/s" },
-      { id: "s5", points: 500, answered: false, question: "What particle has no electric charge?", answer: "Neutron" },
-    ],
-  },
-  {
-    id: "history",
-    name: "History",
-    questions: [
-      { id: "h1", points: 100, answered: false, question: "In which year did World War II end?", answer: "1945", options: ["1943", "1944", "1945", "1946"], correctIndex: 2 },
-      { id: "h2", points: 200, answered: false, question: "Who was the first Emperor of Rome?", answer: "Augustus", options: ["Julius Caesar", "Augustus", "Nero", "Caligula"], correctIndex: 1 },
-      { id: "h3", points: 300, answered: false, question: "The Great Wall of China was built primarily to protect against which group?", answer: "Mongols" },
-      { id: "h4", points: 400, answered: false, question: "Which ancient civilization built Machu Picchu?", answer: "Inca" },
-      { id: "h5", points: 500, answered: false, question: "What year did Nepal become a federal democratic republic?", answer: "2008" },
-    ],
-  },
-  {
-    id: "geography",
-    name: "Geography",
-    questions: [
-      { id: "g1", points: 100, answered: false, question: "What is the capital city of Australia?", answer: "Canberra", options: ["Sydney", "Melbourne", "Canberra", "Brisbane"], correctIndex: 2 },
-      { id: "g2", points: 200, answered: false, question: "Which is the longest river in the world?", answer: "Nile", options: ["Amazon", "Nile", "Yangtze", "Mississippi"], correctIndex: 1 },
-      { id: "g3", points: 300, answered: false, question: "Mount Everest lies on the border of which two countries?", answer: "Nepal and Tibet (China)" },
-      { id: "g4", points: 400, answered: false, question: "What is the smallest country in the world by area?", answer: "Vatican City" },
-      { id: "g5", points: 500, answered: false, question: "Which African country has the most pyramids?", answer: "Sudan" },
-    ],
-  },
-  {
-    id: "literature",
-    name: "Literature",
-    questions: [
-      { id: "l1", points: 100, answered: false, question: "Who wrote 'Romeo and Juliet'?", answer: "William Shakespeare", options: ["Charles Dickens", "William Shakespeare", "Jane Austen", "Mark Twain"], correctIndex: 1 },
-      { id: "l2", points: 200, answered: false, question: "What is the name of the epic poem attributed to Valmiki?", answer: "Ramayana", options: ["Mahabharata", "Ramayana", "Bhagavad Gita", "Vedas"], correctIndex: 1 },
-      { id: "l3", points: 300, answered: false, question: "In which language was 'The Divine Comedy' originally written?", answer: "Italian" },
-      { id: "l4", points: 400, answered: false, question: "Who is the author of '1984'?", answer: "George Orwell" },
-      { id: "l5", points: 500, answered: false, question: "What is considered the world's first novel?", answer: "The Tale of Genji" },
-    ],
-  },
+  { id: "science", name: "Science", questions: generateQuestions("s") },
+  { id: "history", name: "History", questions: generateQuestions("h") },
+  { id: "geography", name: "Geography", questions: generateQuestions("g") },
+  { id: "literature", name: "Literature", questions: generateQuestions("l") },
 ];
 
 interface QuizInterfaceProps {
@@ -68,9 +38,10 @@ export function QuizInterface({ onBack }: QuizInterfaceProps) {
     answer: string;
     options?: string[];
     correctIndex?: number;
-    points: number;
+    number: number;
     category: string;
   } | null>(null);
+  const [passCount, setPassCount] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [timerRunning, setTimerRunning] = useState(false);
@@ -86,14 +57,13 @@ export function QuizInterface({ onBack }: QuizInterfaceProps) {
         questionId,
         question: question.question,
         answer: question.answer,
-        options: question.options,
-        correctIndex: question.correctIndex,
-        points: question.points,
+        number: question.number,
         category: category.name,
       });
       setShowAnswer(false);
       setSelectedOption(null);
       setTimerRunning(true);
+      setPassCount(0);
     }
   }, [categories]);
 
@@ -125,9 +95,19 @@ export function QuizInterface({ onBack }: QuizInterfaceProps) {
     setSelectedOption(null);
   };
 
+  const handlePass = () => {
+    setTimerRunning(false);
+    setPassCount(prev => prev + 1);
+    // Reset timer for next team
+    setTimeout(() => {
+      setTimerRunning(true);
+    }, 100);
+  };
+
   const handleTimeUp = () => {
     setTimerRunning(false);
-    handleRevealAnswer();
+    // On time up, act like a pass
+    handlePass();
   };
 
   return (
@@ -176,6 +156,14 @@ export function QuizInterface({ onBack }: QuizInterfaceProps) {
 
                 <div className="flex gap-3">
                   <Button
+                    variant="outline"
+                    onClick={handlePass}
+                    disabled={showAnswer}
+                  >
+                    <FastForward className="w-4 h-4" />
+                    Pass {passCount > 0 && `(${passCount})`}
+                  </Button>
+                  <Button
                     variant={showAnswer ? "quizCorrect" : "outline"}
                     onClick={handleRevealAnswer}
                     disabled={showAnswer}
@@ -196,7 +184,7 @@ export function QuizInterface({ onBack }: QuizInterfaceProps) {
                 onSelectOption={setSelectedOption}
                 correctOptionIndex={selectedQuestion.correctIndex}
                 category={selectedQuestion.category}
-                points={selectedQuestion.points}
+                points={selectedQuestion.number}
               />
 
               {/* Next question button */}

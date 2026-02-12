@@ -6,7 +6,7 @@ interface QuizCategory {
   name: string;
   questions: {
     id: string;
-    points: number;
+    number: number;
     answered: boolean;
   }[];
 }
@@ -88,7 +88,7 @@ export function QuizBoard({ categories, onSelectQuestion, activeQuestionId }: Qu
                         {isAnswered ? (
                           <Check className="w-8 h-8 text-muted-foreground" />
                         ) : (
-                          question.points
+                          question.number
                         )}
                       </motion.button>
                     </td>
