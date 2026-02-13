@@ -4,13 +4,12 @@ import { QuestionDisplay } from "./QuestionDisplay";
 import { QuizTimer } from "./QuizTimer";
 import { LogoEmblem } from "./LogoEmblem";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Eye, EyeOff, SkipForward, FastForward } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, SkipForward, FastForward, Check } from "lucide-react";
 
 function generateQuestions(prefix: string, count: number = 20) {
   return Array.from({ length: count }, (_, i) => ({
     id: `${prefix}${i + 1}`,
     number: i + 1,
-    answered: false,
     question: `${prefix.toUpperCase()} Question ${i + 1}`,
     answer: `Answer ${i + 1}`,
   }));
@@ -20,10 +19,12 @@ interface QuizInterfaceProps {
   subjectId: string;
   subjectName: string;
   onBack: () => void;
+  answeredIds: Set<string>;
+  onMarkAnswered: (questionId: string) => void;
 }
 
-export function QuizInterface({ subjectId, subjectName, onBack }: QuizInterfaceProps) {
-  const [questions, setQuestions] = useState(() => generateQuestions(subjectId));
+export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onMarkAnswered }: QuizInterfaceProps) {
+  const [questions] = useState(() => generateQuestions(subjectId));
   const [selectedQuestion, setSelectedQuestion] = useState<{
     questionId: string;
     question: string;
@@ -34,10 +35,11 @@ export function QuizInterface({ subjectId, subjectName, onBack }: QuizInterfaceP
   const [showAnswer, setShowAnswer] = useState(false);
   const [timerRunning, setTimerRunning] = useState(false);
   const [timerResetKey, setTimerResetKey] = useState(0);
+  const [timerDuration, setTimerDuration] = useState(30);
 
   const handleSelectQuestion = useCallback((questionId: string) => {
     const question = questions.find(q => q.id === questionId);
-    if (question && !question.answered) {
+    if (question && !answeredIds.has(questionId)) {
       setSelectedQuestion({
         questionId,
         question: question.question,
@@ -50,7 +52,7 @@ export function QuizInterface({ subjectId, subjectName, onBack }: QuizInterfaceP
       setTimerResetKey(prev => prev + 1);
       setTimerRunning(true);
     }
-  }, [questions]);
+  }, [questions, answeredIds]);
 
   const handleRevealAnswer = () => {
     setShowAnswer(true);
@@ -59,15 +61,11 @@ export function QuizInterface({ subjectId, subjectName, onBack }: QuizInterfaceP
 
   const handleNextQuestion = () => {
     if (!selectedQuestion) return;
-    setQuestions(prev => prev.map(q =>
-      q.id === selectedQuestion.questionId ? { ...q, answered: true } : q
-    ));
+    onMarkAnswered(selectedQuestion.questionId);
     setSelectedQuestion(null);
     setShowAnswer(false);
     setTimerRunning(false);
   };
-
-  const [timerDuration, setTimerDuration] = useState(30);
 
   const handlePass = () => {
     setPassCount(prev => prev + 1);
@@ -77,7 +75,6 @@ export function QuizInterface({ subjectId, subjectName, onBack }: QuizInterfaceP
   };
 
   const handleTimeUp = () => {
-    // Timer expired — just stop. No auto-pass.
     setTimerRunning(false);
   };
 
@@ -177,28 +174,35 @@ export function QuizInterface({ subjectId, subjectName, onBack }: QuizInterfaceP
                 </h2>
                 <div className="flex-1 flex items-center justify-center">
                   <div className="grid grid-cols-4 sm:grid-cols-5 gap-4 md:gap-5 w-full max-w-4xl">
-                    {questions.map((q, i) => (
-                      <motion.button
-                        key={q.id}
-                        onClick={() => !q.answered && handleSelectQuestion(q.id)}
-                        className={`
-                          aspect-square rounded-2xl flex items-center justify-center
-                          font-display text-3xl md:text-4xl lg:text-5xl font-bold transition-all duration-300
-                          ${q.answered
-                            ? "bg-muted/50 text-muted-foreground cursor-default"
-                            : "bg-card hover:bg-card-elevated hover:scale-105 hover:shadow-lg text-foreground cursor-pointer border-2 border-border hover:border-primary"
-                          }
-                        `}
-                        whileHover={!q.answered ? { scale: 1.08 } : {}}
-                        whileTap={!q.answered ? { scale: 0.95 } : {}}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: i * 0.02 }}
-                        disabled={q.answered}
-                      >
-                        {q.answered ? "✓" : q.number}
-                      </motion.button>
-                    ))}
+                    {questions.map((q, i) => {
+                      const isAnswered = answeredIds.has(q.id);
+                      return (
+                        <motion.button
+                          key={q.id}
+                          onClick={() => !isAnswered && handleSelectQuestion(q.id)}
+                          className={`
+                            aspect-square rounded-2xl flex items-center justify-center relative
+                            font-display text-3xl md:text-4xl lg:text-5xl font-bold transition-all duration-300
+                            ${isAnswered
+                              ? "bg-muted/50 text-muted-foreground cursor-default"
+                              : "bg-card hover:bg-card-elevated hover:scale-105 hover:shadow-lg text-foreground cursor-pointer border-2 border-border hover:border-primary"
+                            }
+                          `}
+                          whileHover={!isAnswered ? { scale: 1.08 } : {}}
+                          whileTap={!isAnswered ? { scale: 0.95 } : {}}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: i * 0.02 }}
+                          disabled={isAnswered}
+                        >
+                          {isAnswered ? (
+                            <Check className="w-10 h-10 md:w-12 md:h-12 text-primary" strokeWidth={3} />
+                          ) : (
+                            q.number
+                          )}
+                        </motion.button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
