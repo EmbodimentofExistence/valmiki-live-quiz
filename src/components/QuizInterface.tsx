@@ -86,9 +86,17 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
       exit={{ opacity: 0 }}
     >
       <header className="flex items-center justify-between mb-6">
-        <Button variant="ghost" onClick={onBack} className="gap-2">
+        <Button variant="ghost" onClick={() => {
+          if (selectedQuestion) {
+            setSelectedQuestion(null);
+            setShowAnswer(false);
+            setTimerRunning(false);
+          } else {
+            onBack();
+          }
+        }} className="gap-2">
           <ArrowLeft className="w-4 h-4" />
-          Back to Subjects
+          {selectedQuestion ? "Back to Questions" : "Back to Subjects"}
         </Button>
         <div className="flex items-center gap-4">
           <LogoEmblem size="sm" />
