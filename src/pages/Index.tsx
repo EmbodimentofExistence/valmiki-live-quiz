@@ -10,10 +10,18 @@ type View = "hero" | "subjects" | "quiz";
 const Index = () => {
   const [currentView, setCurrentView] = useState<View>("hero");
   const [selectedSubject, setSelectedSubject] = useState<{ id: string; name: string } | null>(null);
+  const [completedSubjects, setCompletedSubjects] = useState<Set<string>>(new Set());
 
   const handleSelectSubject = (subjectId: string, subjectName: string) => {
     setSelectedSubject({ id: subjectId, name: subjectName });
     setCurrentView("quiz");
+  };
+
+  const handleBackToSubjects = () => {
+    if (selectedSubject) {
+      setCompletedSubjects(prev => new Set(prev).add(selectedSubject.id));
+    }
+    setCurrentView("subjects");
   };
 
   return (
@@ -33,6 +41,7 @@ const Index = () => {
             key="subjects"
             onSelectSubject={handleSelectSubject}
             onBack={() => setCurrentView("hero")}
+            completedSubjects={completedSubjects}
           />
         )}
 
@@ -41,7 +50,7 @@ const Index = () => {
             key="quiz"
             subjectId={selectedSubject.id}
             subjectName={selectedSubject.name}
-            onBack={() => setCurrentView("subjects")}
+            onBack={handleBackToSubjects}
           />
         )}
       </AnimatePresence>

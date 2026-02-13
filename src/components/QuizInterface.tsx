@@ -167,33 +167,35 @@ export function QuizInterface({ subjectId, subjectName, onBack }: QuizInterfaceP
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <div className="glass rounded-3xl p-6 md:p-8">
+              <div className="glass rounded-3xl p-6 md:p-8 lg:p-10 min-h-[70vh] flex flex-col">
                 <h2 className="font-display text-2xl md:text-3xl font-bold text-center mb-8">
                   {subjectName} — <span className="text-gold-gradient">Select a Question</span>
                 </h2>
-                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-10 gap-3 max-w-3xl mx-auto">
-                  {questions.map((q, i) => (
-                    <motion.button
-                      key={q.id}
-                      onClick={() => !q.answered && handleSelectQuestion(q.id)}
-                      className={`
-                        aspect-square rounded-2xl flex items-center justify-center
-                        font-display text-2xl font-bold transition-all duration-300
-                        ${q.answered
-                          ? "bg-muted/50 text-muted-foreground cursor-default"
-                          : "bg-card hover:bg-card-elevated hover:scale-105 hover:shadow-lg text-foreground cursor-pointer border-2 border-border hover:border-primary"
-                        }
-                      `}
-                      whileHover={!q.answered ? { scale: 1.08 } : {}}
-                      whileTap={!q.answered ? { scale: 0.95 } : {}}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: i * 0.02 }}
-                      disabled={q.answered}
-                    >
-                      {q.answered ? "✓" : q.number}
-                    </motion.button>
-                  ))}
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-4 md:gap-5 w-full max-w-4xl">
+                    {questions.map((q, i) => (
+                      <motion.button
+                        key={q.id}
+                        onClick={() => !q.answered && handleSelectQuestion(q.id)}
+                        className={`
+                          aspect-square rounded-2xl flex items-center justify-center
+                          font-display text-3xl md:text-4xl lg:text-5xl font-bold transition-all duration-300
+                          ${q.answered
+                            ? "bg-muted/50 text-muted-foreground cursor-default"
+                            : "bg-card hover:bg-card-elevated hover:scale-105 hover:shadow-lg text-foreground cursor-pointer border-2 border-border hover:border-primary"
+                          }
+                        `}
+                        whileHover={!q.answered ? { scale: 1.08 } : {}}
+                        whileTap={!q.answered ? { scale: 0.95 } : {}}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: i * 0.02 }}
+                        disabled={q.answered}
+                      >
+                        {q.answered ? "✓" : q.number}
+                      </motion.button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </motion.div>
