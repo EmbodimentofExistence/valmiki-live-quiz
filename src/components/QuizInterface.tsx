@@ -46,6 +46,7 @@ export function QuizInterface({ subjectId, subjectName, onBack }: QuizInterfaceP
       });
       setShowAnswer(false);
       setPassCount(0);
+      setTimerDuration(30);
       setTimerResetKey(prev => prev + 1);
       setTimerRunning(true);
     }
@@ -66,8 +67,11 @@ export function QuizInterface({ subjectId, subjectName, onBack }: QuizInterfaceP
     setTimerRunning(false);
   };
 
+  const [timerDuration, setTimerDuration] = useState(30);
+
   const handlePass = () => {
     setPassCount(prev => prev + 1);
+    setTimerDuration(15);
     setTimerResetKey(prev => prev + 1);
     setTimerRunning(true);
   };
@@ -115,7 +119,7 @@ export function QuizInterface({ subjectId, subjectName, onBack }: QuizInterfaceP
                 </div>
 
                 <QuizTimer
-                  duration={30}
+                  duration={timerDuration}
                   isRunning={timerRunning}
                   resetKey={timerResetKey}
                   onTimeUp={handleTimeUp}
