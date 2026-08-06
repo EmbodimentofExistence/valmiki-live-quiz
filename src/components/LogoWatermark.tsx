@@ -7,7 +7,7 @@ export function LogoWatermark() {
       <motion.img
         src={valmikiLogo}
         alt=""
-        className="w-[60vw] max-w-[800px] select-none"
+        className="w-[60vw] max-w-[800px] aspect-square object-cover rounded-full select-none"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1.5, ease: "easeOut" }}

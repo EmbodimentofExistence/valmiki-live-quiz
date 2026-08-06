@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { LogoEmblem } from "./LogoEmblem";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Play } from "lucide-react";
+import { Play } from "lucide-react";
 
 interface HeroSectionProps {
   onStartQuiz: () => void;
@@ -80,17 +80,16 @@ export function HeroSection({ onStartQuiz }: HeroSectionProps) {
           Carnival
         </motion.h2>
 
-        {/* Year badge */}
-        <motion.div
-          className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/10 border border-primary/30 mb-8"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
+        {/* Year */}
+        <motion.p
+          className="font-display text-3xl md:text-4xl font-bold text-primary mb-8 tracking-[0.15em]"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
         >
-          <Sparkles className="w-5 h-5 text-primary" />
-          <span className="font-display text-2xl font-bold text-primary">2083</span>
-          <Sparkles className="w-5 h-5 text-primary" />
-        </motion.div>
+          2083
+        </motion.p>
+
 
         {/* Subtitle */}
         <motion.p
