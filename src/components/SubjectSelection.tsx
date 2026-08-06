@@ -38,7 +38,7 @@ export function SubjectSelection({ onSelectSubject, onBack, completedSubjects }:
           <LogoEmblem size="sm" />
           <div className="text-right hidden sm:block">
             <h1 className="font-display text-xl font-bold">Valmiki Quiz Carnival</h1>
-            <p className="text-sm text-muted-foreground">2082</p>
+            <p className="text-sm text-muted-foreground">2083</p>
           </div>
         </div>
       </header>

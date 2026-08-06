@@ -7,7 +7,7 @@ import { QuizInterface } from "@/components/QuizInterface";
 
 type View = "hero" | "subjects" | "quiz";
 
-const QUESTIONS_PER_SUBJECT = 20;
+const QUESTIONS_PER_SUBJECT = 10;
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<View>("hero");

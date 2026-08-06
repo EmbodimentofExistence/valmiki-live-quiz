@@ -102,7 +102,7 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
           <LogoEmblem size="sm" />
           <div className="text-right hidden sm:block">
             <h1 className="font-display text-xl font-bold">{subjectName}</h1>
-            <p className="text-sm text-muted-foreground">Valmiki Quiz Carnival 2082</p>
+            <p className="text-sm text-muted-foreground">Valmiki Quiz Carnival 2083</p>
           </div>
         </div>
       </header>

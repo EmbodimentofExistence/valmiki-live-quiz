@@ -88,7 +88,7 @@ export function HeroSection({ onStartQuiz }: HeroSectionProps) {
           transition={{ delay: 0.6 }}
         >
           <Sparkles className="w-5 h-5 text-primary" />
-          <span className="font-display text-2xl font-bold text-primary">2082</span>
+          <span className="font-display text-2xl font-bold text-primary">2083</span>
           <Sparkles className="w-5 h-5 text-primary" />
         </motion.div>
 
@@ -99,7 +99,7 @@ export function HeroSection({ onStartQuiz }: HeroSectionProps) {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7 }}
         >
-          An Interschool Academic Competition
+          An Interhouse Academic Competition
         </motion.p>
 
         {/* CTA Button */}
