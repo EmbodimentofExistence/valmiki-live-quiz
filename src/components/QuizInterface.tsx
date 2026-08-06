@@ -6,7 +6,9 @@ import { LogoEmblem } from "./LogoEmblem";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Eye, EyeOff, SkipForward, FastForward, Check } from "lucide-react";
 
-function generateQuestions(prefix: string, count: number = 20) {
+import passSound from "@/assets/pass-sound.mp3.asset.json";
+
+function generateQuestions(prefix: string, count: number = 10) {
   return Array.from({ length: count }, (_, i) => ({
     id: `${prefix}${i + 1}`,
     number: i + 1,
@@ -14,6 +16,13 @@ function generateQuestions(prefix: string, count: number = 20) {
     answer: `Answer ${i + 1}`,
   }));
 }
+
+function getDurations(subjectId: string) {
+  return subjectId === "maths-iq"
+    ? { initial: 60, pass: 30 }
+    : { initial: 30, pass: 15 };
+}
+
 
 interface QuizInterfaceProps {
   subjectId: string;
