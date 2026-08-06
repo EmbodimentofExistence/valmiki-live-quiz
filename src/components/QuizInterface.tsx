@@ -40,11 +40,13 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
     answer: string;
     number: number;
   } | null>(null);
+  const durations = getDurations(subjectId);
   const [passCount, setPassCount] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [timerRunning, setTimerRunning] = useState(false);
   const [timerResetKey, setTimerResetKey] = useState(0);
-  const [timerDuration, setTimerDuration] = useState(30);
+  const [timerDuration, setTimerDuration] = useState(durations.initial);
+  const passAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const handleSelectQuestion = useCallback((questionId: string) => {
     const question = questions.find(q => q.id === questionId);
@@ -57,11 +59,11 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
       });
       setShowAnswer(false);
       setPassCount(0);
-      setTimerDuration(30);
+      setTimerDuration(durations.initial);
       setTimerResetKey(prev => prev + 1);
       setTimerRunning(true);
     }
-  }, [questions, answeredIds]);
+  }, [questions, answeredIds, durations.initial]);
 
   const handleRevealAnswer = () => {
     setShowAnswer(true);
@@ -77,11 +79,17 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
   };
 
   const handlePass = () => {
+    if (!passAudioRef.current) {
+      passAudioRef.current = new Audio(passSound.url);
+    }
+    passAudioRef.current.currentTime = 0;
+    void passAudioRef.current.play().catch(() => {});
     setPassCount(prev => prev + 1);
-    setTimerDuration(15);
+    setTimerDuration(durations.pass);
     setTimerResetKey(prev => prev + 1);
     setTimerRunning(true);
   };
+
 
   const handleTimeUp = () => {
     setTimerRunning(false);
