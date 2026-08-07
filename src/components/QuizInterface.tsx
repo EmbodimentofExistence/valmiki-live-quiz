@@ -27,7 +27,7 @@ interface QuizInterfaceProps {
 }
 
 export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onMarkAnswered }: QuizInterfaceProps) {
-  const [questions] = useState(() => generateQuestions(subjectId));
+  const [questions] = useState(() => getQuestions(subjectId));
   const [selectedQuestion, setSelectedQuestion] = useState<{
     questionId: string;
     question: string;
@@ -41,6 +41,42 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
   const [timerResetKey, setTimerResetKey] = useState(0);
   const [timerDuration, setTimerDuration] = useState(durations.initial);
   const passAudioRef = useRef<HTMLAudioElement | null>(null);
+  const tickAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const stopTicking = useCallback(() => {
+    const tick = tickAudioRef.current;
+    if (tick) {
+      tick.pause();
+      tick.currentTime = 0;
+    }
+  }, []);
+
+  const startTicking = useCallback(() => {
+    if (!tickAudioRef.current) {
+      tickAudioRef.current = new Audio(tickSound.url);
+      tickAudioRef.current.loop = true;
+    }
+    tickAudioRef.current.currentTime = 0;
+    void tickAudioRef.current.play().catch(() => {});
+  }, []);
+
+  const playPassSound = useCallback((onEnded?: () => void) => {
+    if (!passAudioRef.current) {
+      passAudioRef.current = new Audio(passSound.url);
+    }
+    const audio = passAudioRef.current;
+    audio.onended = onEnded ? () => onEnded() : null;
+    audio.currentTime = 0;
+    void audio.play().catch(() => onEnded?.());
+  }, []);
+
+  // Stop all audio when leaving the screen
+  useEffect(() => {
+    return () => {
+      stopTicking();
+      passAudioRef.current?.pause();
+    };
+  }, [stopTicking]);
 
   const handleSelectQuestion = useCallback((questionId: string) => {
     const question = questions.find(q => q.id === questionId);
@@ -56,12 +92,14 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
       setTimerDuration(durations.initial);
       setTimerResetKey(prev => prev + 1);
       setTimerRunning(true);
+      startTicking();
     }
-  }, [questions, answeredIds, durations.initial]);
+  }, [questions, answeredIds, durations.initial, startTicking]);
 
   const handleRevealAnswer = () => {
     setShowAnswer(true);
     setTimerRunning(false);
+    stopTicking();
   };
 
   const handleNextQuestion = () => {
@@ -70,24 +108,24 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
     setSelectedQuestion(null);
     setShowAnswer(false);
     setTimerRunning(false);
+    stopTicking();
   };
 
   const handlePass = () => {
-    if (!passAudioRef.current) {
-      passAudioRef.current = new Audio(passSound.url);
-    }
-    passAudioRef.current.currentTime = 0;
-    void passAudioRef.current.play().catch(() => {});
+    stopTicking();
+    playPassSound(() => startTicking());
     setPassCount(prev => prev + 1);
     setTimerDuration(durations.pass);
     setTimerResetKey(prev => prev + 1);
     setTimerRunning(true);
   };
 
-
   const handleTimeUp = () => {
     setTimerRunning(false);
+    stopTicking();
+    playPassSound();
   };
+
 
   return (
     <motion.div
