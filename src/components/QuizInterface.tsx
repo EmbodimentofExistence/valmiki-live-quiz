@@ -1,27 +1,21 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { QuestionDisplay } from "./QuestionDisplay";
 import { QuizTimer } from "./QuizTimer";
 import { LogoEmblem } from "./LogoEmblem";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Eye, EyeOff, SkipForward, FastForward, Check } from "lucide-react";
+import { getQuestions } from "@/data/questions";
 
 import passSound from "@/assets/pass-sound.mp3.asset.json";
-
-function generateQuestions(prefix: string, count: number = 10) {
-  return Array.from({ length: count }, (_, i) => ({
-    id: `${prefix}${i + 1}`,
-    number: i + 1,
-    question: `${prefix.toUpperCase()} Question ${i + 1}`,
-    answer: `Answer ${i + 1}`,
-  }));
-}
+import tickSound from "@/assets/clock-tick.mp3.asset.json";
 
 function getDurations(subjectId: string) {
   return subjectId === "maths-iq"
     ? { initial: 60, pass: 30 }
     : { initial: 30, pass: 15 };
 }
+
 
 
 interface QuizInterfaceProps {
@@ -33,7 +27,7 @@ interface QuizInterfaceProps {
 }
 
 export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onMarkAnswered }: QuizInterfaceProps) {
-  const [questions] = useState(() => generateQuestions(subjectId));
+  const [questions] = useState(() => getQuestions(subjectId));
   const [selectedQuestion, setSelectedQuestion] = useState<{
     questionId: string;
     question: string;
@@ -47,6 +41,42 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
   const [timerResetKey, setTimerResetKey] = useState(0);
   const [timerDuration, setTimerDuration] = useState(durations.initial);
   const passAudioRef = useRef<HTMLAudioElement | null>(null);
+  const tickAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const stopTicking = useCallback(() => {
+    const tick = tickAudioRef.current;
+    if (tick) {
+      tick.pause();
+      tick.currentTime = 0;
+    }
+  }, []);
+
+  const startTicking = useCallback(() => {
+    if (!tickAudioRef.current) {
+      tickAudioRef.current = new Audio(tickSound.url);
+      tickAudioRef.current.loop = true;
+    }
+    tickAudioRef.current.currentTime = 0;
+    void tickAudioRef.current.play().catch(() => {});
+  }, []);
+
+  const playPassSound = useCallback((onEnded?: () => void) => {
+    if (!passAudioRef.current) {
+      passAudioRef.current = new Audio(passSound.url);
+    }
+    const audio = passAudioRef.current;
+    audio.onended = onEnded ? () => onEnded() : null;
+    audio.currentTime = 0;
+    void audio.play().catch(() => onEnded?.());
+  }, []);
+
+  // Stop all audio when leaving the screen
+  useEffect(() => {
+    return () => {
+      stopTicking();
+      passAudioRef.current?.pause();
+    };
+  }, [stopTicking]);
 
   const handleSelectQuestion = useCallback((questionId: string) => {
     const question = questions.find(q => q.id === questionId);
@@ -62,12 +92,14 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
       setTimerDuration(durations.initial);
       setTimerResetKey(prev => prev + 1);
       setTimerRunning(true);
+      startTicking();
     }
-  }, [questions, answeredIds, durations.initial]);
+  }, [questions, answeredIds, durations.initial, startTicking]);
 
   const handleRevealAnswer = () => {
     setShowAnswer(true);
     setTimerRunning(false);
+    stopTicking();
   };
 
   const handleNextQuestion = () => {
@@ -76,24 +108,24 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
     setSelectedQuestion(null);
     setShowAnswer(false);
     setTimerRunning(false);
+    stopTicking();
   };
 
   const handlePass = () => {
-    if (!passAudioRef.current) {
-      passAudioRef.current = new Audio(passSound.url);
-    }
-    passAudioRef.current.currentTime = 0;
-    void passAudioRef.current.play().catch(() => {});
+    stopTicking();
+    playPassSound(() => startTicking());
     setPassCount(prev => prev + 1);
     setTimerDuration(durations.pass);
     setTimerResetKey(prev => prev + 1);
     setTimerRunning(true);
   };
 
-
   const handleTimeUp = () => {
     setTimerRunning(false);
+    stopTicking();
+    playPassSound();
   };
+
 
   return (
     <motion.div
@@ -104,6 +136,8 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
     >
       <header className="flex items-center justify-between mb-6">
         <Button variant="ghost" onClick={() => {
+          stopTicking();
+          passAudioRef.current?.pause();
           if (selectedQuestion) {
             setSelectedQuestion(null);
             setShowAnswer(false);
@@ -112,6 +146,7 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
             onBack();
           }
         }} className="gap-2">
+
           <ArrowLeft className="w-4 h-4" />
           {selectedQuestion ? "Back to Questions" : "Back to Subjects"}
         </Button>
