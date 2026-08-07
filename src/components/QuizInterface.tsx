@@ -73,14 +73,19 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
   }, []);
 
   const playPassSound = useCallback((onEnded?: () => void) => {
-    const audio = passAudioRef.current;
-    if (!audio) {
+    const base = passAudioRef.current;
+    // Play a fresh clone each time so overlapping/repeat triggers always fire
+    const audio = base ? (base.cloneNode(true) as HTMLAudioElement) : new Audio(passSound.url);
+    base?.pause();
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
       onEnded?.();
-      return;
-    }
-    audio.onended = onEnded ? () => onEnded() : null;
+    };
+    audio.onended = finish;
     audio.currentTime = 0;
-    void audio.play().catch(() => onEnded?.());
+    void audio.play().catch(finish);
   }, []);
 
   // Stop all audio when leaving the screen
