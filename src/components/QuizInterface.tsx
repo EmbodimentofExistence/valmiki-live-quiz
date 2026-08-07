@@ -8,7 +8,7 @@ import { ArrowLeft, Eye, EyeOff, SkipForward, FastForward, Check } from "lucide-
 import { getQuestions } from "@/data/questions";
 
 import passSound from "@/assets/pass-sound.mp3.asset.json";
-import tickSound from "@/assets/clock-tick.mp3.asset.json";
+import tickSound from "@/assets/clock-tick-1min.mp3.asset.json";
 
 function getDurations(subjectId: string) {
   return subjectId === "maths-iq"
@@ -43,6 +43,20 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
   const passAudioRef = useRef<HTMLAudioElement | null>(null);
   const tickAudioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Preload audio up-front so playback starts instantly (no buffering delay)
+  useEffect(() => {
+    const tick = new Audio(tickSound.url);
+    tick.loop = true;
+    tick.preload = "auto";
+    tick.load();
+    tickAudioRef.current = tick;
+
+    const pass = new Audio(passSound.url);
+    pass.preload = "auto";
+    pass.load();
+    passAudioRef.current = pass;
+  }, []);
+
   const stopTicking = useCallback(() => {
     const tick = tickAudioRef.current;
     if (tick) {
@@ -52,19 +66,18 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
   }, []);
 
   const startTicking = useCallback(() => {
-    if (!tickAudioRef.current) {
-      tickAudioRef.current = new Audio(tickSound.url);
-      tickAudioRef.current.loop = true;
-    }
-    tickAudioRef.current.currentTime = 0;
-    void tickAudioRef.current.play().catch(() => {});
+    const tick = tickAudioRef.current;
+    if (!tick) return;
+    tick.currentTime = 0;
+    void tick.play().catch(() => {});
   }, []);
 
   const playPassSound = useCallback((onEnded?: () => void) => {
-    if (!passAudioRef.current) {
-      passAudioRef.current = new Audio(passSound.url);
-    }
     const audio = passAudioRef.current;
+    if (!audio) {
+      onEnded?.();
+      return;
+    }
     audio.onended = onEnded ? () => onEnded() : null;
     audio.currentTime = 0;
     void audio.play().catch(() => onEnded?.());
