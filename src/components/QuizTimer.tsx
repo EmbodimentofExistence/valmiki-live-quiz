@@ -19,10 +19,11 @@ export function QuizTimer({ duration, isRunning, resetKey = 0, onTimeUp }: QuizT
   }, [resetKey, duration]);
 
   useEffect(() => {
-    if (!isRunning || remaining <= 0) return;
+    if (!isRunning) return;
 
     const interval = setInterval(() => {
       setRemaining((prev) => {
+        if (prev <= 0) return 0;
         const next = prev - 1;
         if (next <= 0 && !timeUpCalled.current) {
           timeUpCalled.current = true;
@@ -33,7 +34,7 @@ export function QuizTimer({ duration, isRunning, resetKey = 0, onTimeUp }: QuizT
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isRunning, onTimeUp]);
+  }, [isRunning, resetKey, duration, onTimeUp]);
 
   const progress = (remaining / duration) * 100;
   const isLow = remaining <= 10;
