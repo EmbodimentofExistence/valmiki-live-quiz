@@ -8,7 +8,7 @@ import { ArrowLeft, Eye, EyeOff, SkipForward, FastForward, Check } from "lucide-
 import { getQuestions } from "@/data/questions";
 
 import passSound from "@/assets/pass-sound.mp3.asset.json";
-import tickSound from "@/assets/clock-tick.mp3.asset.json";
+import tickSound from "@/assets/clock-tick-1min.mp3.asset.json";
 
 function getDurations(subjectId: string) {
   return subjectId === "maths-iq"
