@@ -1,27 +1,21 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { QuestionDisplay } from "./QuestionDisplay";
 import { QuizTimer } from "./QuizTimer";
 import { LogoEmblem } from "./LogoEmblem";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Eye, EyeOff, SkipForward, FastForward, Check } from "lucide-react";
+import { getQuestions } from "@/data/questions";
 
 import passSound from "@/assets/pass-sound.mp3.asset.json";
-
-function generateQuestions(prefix: string, count: number = 10) {
-  return Array.from({ length: count }, (_, i) => ({
-    id: `${prefix}${i + 1}`,
-    number: i + 1,
-    question: `${prefix.toUpperCase()} Question ${i + 1}`,
-    answer: `Answer ${i + 1}`,
-  }));
-}
+import tickSound from "@/assets/clock-tick.mp3.asset.json";
 
 function getDurations(subjectId: string) {
   return subjectId === "maths-iq"
     ? { initial: 60, pass: 30 }
     : { initial: 30, pass: 15 };
 }
+
 
 
 interface QuizInterfaceProps {
