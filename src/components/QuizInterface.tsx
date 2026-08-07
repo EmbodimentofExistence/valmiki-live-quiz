@@ -136,6 +136,8 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
     >
       <header className="flex items-center justify-between mb-6">
         <Button variant="ghost" onClick={() => {
+          stopTicking();
+          passAudioRef.current?.pause();
           if (selectedQuestion) {
             setSelectedQuestion(null);
             setShowAnswer(false);
@@ -144,6 +146,7 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
             onBack();
           }
         }} className="gap-2">
+
           <ArrowLeft className="w-4 h-4" />
           {selectedQuestion ? "Back to Questions" : "Back to Subjects"}
         </Button>
