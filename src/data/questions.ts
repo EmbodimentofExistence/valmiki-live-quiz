@@ -90,6 +90,18 @@ const questionBank: Record<string, { question: string; answer: string }[]> = {
     { question: "Which is the longest district of Nepal?", answer: "Surkhet" },
     { question: "Which place in Asia is located at the lowest altitude?", answer: "Dead Sea" },
   ],
+  "maths-iq": [
+    { question: "Complete the series: R, U, X, A, D, ?", answer: "G" },
+    { question: "How many zeros are there in 1 million?", answer: "6" },
+    { question: "Ryan is ranked exactly in the middle of his class. There are 12 students who scored higher and 12 who scored lower. How many students are there in his class?", answer: "25 students" },
+    { question: "Which Hindu-Arabic number cannot be represented by a Roman numeral?", answer: "0 (Zero)" },
+    { question: "If 60 caps are dried in 60 minutes, in how many minutes can 9 caps be dried together?", answer: "60 minutes" },
+    { question: "Which “writer” is not a human being?", answer: "Typewriter" },
+    { question: "Who was the first person to use the term “Jai Nepal”?", answer: "Shukraraj Shastri" },
+    { question: "Can you “shoot” your friend, cause him no injury, and not commit any crime? How?", answer: "By taking his photograph." },
+    { question: "A number is doubled and then 5 is added. The result is 21. What is the number?", answer: "8" },
+    { question: "What do we call points that lie on the same straight line?", answer: "Collinear points" },
+  ],
 };
 
 export function getQuestions(subjectId: string, count = 10): QuizQuestion[] {
