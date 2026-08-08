@@ -10,7 +10,7 @@ const subjects = [
   { id: "games-sports", name: "Games & Sports", icon: Trophy },
   { id: "maths-iq", name: "Maths & IQ", icon: Brain },
   { id: "science-tech", name: "Science & Technology", icon: Atom },
-  { id: "religion-culture", name: "Religion & Culture", icon: Church },
+  { id: "religion-culture", name: "भाषा र साहित्य", icon: Church },
   { id: "art-literature", name: "Art & Literature", icon: Palette },
 ];
 
