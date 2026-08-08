@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { forwardRef } from "react";
 import valmikiLogo from "@/assets/valmiki-logo.png";
 
 interface LogoEmblemProps {
@@ -12,9 +13,13 @@ const sizeClasses = {
   lg: "w-32 h-32",
 };
 
-export function LogoEmblem({ size = "md", className = "" }: LogoEmblemProps) {
+export const LogoEmblem = forwardRef<HTMLDivElement, LogoEmblemProps>(function LogoEmblem(
+  { size = "md", className = "" },
+  ref
+) {
   return (
     <motion.div
+      ref={ref}
       className={`relative ${sizeClasses[size]} ${className}`}
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -40,4 +45,4 @@ export function LogoEmblem({ size = "md", className = "" }: LogoEmblemProps) {
       />
     </motion.div>
   );
-}
+});
