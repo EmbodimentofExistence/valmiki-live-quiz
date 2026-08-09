@@ -4,11 +4,12 @@ import { QuestionDisplay } from "./QuestionDisplay";
 import { QuizTimer } from "./QuizTimer";
 import { LogoEmblem } from "./LogoEmblem";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Eye, EyeOff, SkipForward, FastForward, Check } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, SkipForward, FastForward, Check, Pause, Play } from "lucide-react";
 import { getQuestions } from "@/data/questions";
 
 import passSound from "@/assets/pass-sound.mp3.asset.json";
 import tickSound from "@/assets/clock-tick-1min.mp3.asset.json";
+import revealSound from "@/assets/reveal-sound.mp3.asset.json";
 
 function getDurations(subjectId: string) {
   return subjectId === "maths-iq"
@@ -42,6 +43,7 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
   const [timerDuration, setTimerDuration] = useState(durations.initial);
   const passAudioRef = useRef<HTMLAudioElement | null>(null);
   const tickAudioRef = useRef<HTMLAudioElement | null>(null);
+  const revealAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Preload audio up-front so playback starts instantly (no buffering delay)
   useEffect(() => {
@@ -55,6 +57,11 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
     pass.preload = "auto";
     pass.load();
     passAudioRef.current = pass;
+
+    const reveal = new Audio(revealSound.url);
+    reveal.preload = "auto";
+    reveal.load();
+    revealAudioRef.current = reveal;
   }, []);
 
   const stopTicking = useCallback(() => {
@@ -93,6 +100,7 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
     return () => {
       stopTicking();
       passAudioRef.current?.pause();
+      revealAudioRef.current?.pause();
     };
   }, [stopTicking]);
 
@@ -115,9 +123,28 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
   }, [questions, answeredIds, durations.initial, startTicking]);
 
   const handleRevealAnswer = () => {
+    if (showAnswer) return;
     setShowAnswer(true);
     setTimerRunning(false);
     stopTicking();
+    const reveal = revealAudioRef.current;
+    if (reveal) {
+      reveal.currentTime = 0;
+      void reveal.play().catch(() => {});
+    }
+  };
+
+  const handleTogglePause = () => {
+    if (showAnswer) return;
+    setTimerRunning((running) => {
+      if (running) {
+        stopTicking();
+        return false;
+      }
+      const tick = tickAudioRef.current;
+      void tick?.play().catch(() => {});
+      return true;
+    });
   };
 
   const handleNextQuestion = () => {
@@ -201,6 +228,10 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
                 />
 
                 <div className="flex gap-3">
+                  <Button variant="outline" onClick={handleTogglePause} disabled={showAnswer}>
+                    {timerRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                    {timerRunning ? "Pause" : "Resume"}
+                  </Button>
                   <Button variant="outline" onClick={handlePass} disabled={showAnswer}>
                     <FastForward className="w-4 h-4" />
                     Pass {passCount > 0 && `(${passCount})`}
