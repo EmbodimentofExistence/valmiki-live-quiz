@@ -93,13 +93,24 @@ export function HeroSection({ onStartQuiz }: HeroSectionProps) {
 
         {/* Subtitle */}
         <motion.p
-          className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto mb-12"
+          className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto mb-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7 }}
         >
           An Interhouse Academic Competition
         </motion.p>
+
+        {/* Collaboration */}
+        <motion.p
+          className="text-primary/80 text-base md:text-lg tracking-wide mb-12"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.75 }}
+        >
+          In collaboration with Interact Club of Valmiki
+        </motion.p>
+
 
         {/* CTA Button */}
         <motion.div
