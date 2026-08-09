@@ -20,7 +20,7 @@ export function QuizTimer({ duration, isRunning, resetKey = 0, onTimeUp }: QuizT
 
   useEffect(() => {
     if (!isRunning) return;
-    if (remaining <= 0) return;
+    
 
     const interval = setInterval(() => {
       setRemaining((prev) => {
