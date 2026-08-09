@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { LogoEmblem } from "./LogoEmblem";
 import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
+import interactLogo from "@/assets/interact-club-logo.png";
 
 interface HeroSectionProps {
   onStartQuiz: () => void;
@@ -102,14 +103,22 @@ export function HeroSection({ onStartQuiz }: HeroSectionProps) {
         </motion.p>
 
         {/* Collaboration */}
-        <motion.p
-          className="text-primary/80 text-base md:text-lg tracking-wide mb-12"
+        <motion.div
+          className="flex items-center justify-center gap-4 mb-12"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.75 }}
         >
-          In collaboration with Interact Club of Valmiki
-        </motion.p>
+          <img
+            src={interactLogo}
+            alt="Interact Club of Valmiki logo"
+            className="w-14 h-14 md:w-16 md:h-16 rounded-full shrink-0"
+            loading="lazy"
+          />
+          <p className="text-primary/80 text-base md:text-lg tracking-wide">
+            In collaboration with Interact Club of Valmiki
+          </p>
+        </motion.div>
 
 
         {/* CTA Button */}
