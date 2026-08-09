@@ -20,6 +20,7 @@ export function QuizTimer({ duration, isRunning, resetKey = 0, onTimeUp }: QuizT
 
   useEffect(() => {
     if (!isRunning) return;
+    if (remaining <= 0) return;
 
     const interval = setInterval(() => {
       setRemaining((prev) => {
@@ -34,7 +35,9 @@ export function QuizTimer({ duration, isRunning, resetKey = 0, onTimeUp }: QuizT
     }, 1000);
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRunning, resetKey, duration, onTimeUp]);
+
 
   const progress = (remaining / duration) * 100;
   const isLow = remaining <= 10;
