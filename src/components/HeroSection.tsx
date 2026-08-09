@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { LogoEmblem } from "./LogoEmblem";
 import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
-import interactLogo from "@/assets/interact-club-logo.png.asset.json";
+import interactLogo from "@/assets/interact-club-logo.png";
 
 interface HeroSectionProps {
   onStartQuiz: () => void;
@@ -110,7 +110,7 @@ export function HeroSection({ onStartQuiz }: HeroSectionProps) {
           transition={{ delay: 0.75 }}
         >
           <img
-            src={interactLogo.url}
+            src={interactLogo}
             alt="Interact Club of Valmiki logo"
             className="w-14 h-14 md:w-16 md:h-16 rounded-full shrink-0"
             loading="lazy"
