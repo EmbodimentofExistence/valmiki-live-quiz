@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Eye, EyeOff, SkipForward, FastForward, Check, Pause, Play } from "lucide-react";
 import { getQuestions } from "@/data/questions";
 
-import passSound from "@/assets/pass-sound.mp3.asset.json";
-import tickSound from "@/assets/clock-tick-1min.mp3.asset.json";
-import revealSound from "@/assets/reveal-sound.mp3.asset.json";
+// Served from /public so they work on any host (Lovable, Vercel, etc.)
+const passSoundUrl = "/sounds/pass-sound.mp3";
+const tickSoundUrl = "/sounds/clock-tick-1min.mp3";
+const revealSoundUrl = "/sounds/reveal-sound.mp3";
 
 function getDurations(subjectId: string) {
   return subjectId === "maths-iq"
@@ -47,18 +48,18 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
 
   // Preload audio up-front so playback starts instantly (no buffering delay)
   useEffect(() => {
-    const tick = new Audio(tickSound.url);
+    const tick = new Audio(tickSoundUrl);
     tick.loop = true;
     tick.preload = "auto";
     tick.load();
     tickAudioRef.current = tick;
 
-    const pass = new Audio(passSound.url);
+    const pass = new Audio(passSoundUrl);
     pass.preload = "auto";
     pass.load();
     passAudioRef.current = pass;
 
-    const reveal = new Audio(revealSound.url);
+    const reveal = new Audio(revealSoundUrl);
     reveal.preload = "auto";
     reveal.load();
     revealAudioRef.current = reveal;
@@ -82,7 +83,7 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
   const playPassSound = useCallback((onEnded?: () => void) => {
     const base = passAudioRef.current;
     // Play a fresh clone each time so overlapping/repeat triggers always fire
-    const audio = base ? (base.cloneNode(true) as HTMLAudioElement) : new Audio(passSound.url);
+    const audio = base ? (base.cloneNode(true) as HTMLAudioElement) : new Audio(passSoundUrl);
     base?.pause();
     let done = false;
     const finish = () => {
@@ -136,15 +137,14 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
 
   const handleTogglePause = () => {
     if (showAnswer) return;
-    setTimerRunning((running) => {
-      if (running) {
-        stopTicking();
-        return false;
-      }
+    if (timerRunning) {
+      setTimerRunning(false);
+      stopTicking();
+    } else {
+      setTimerRunning(true);
       const tick = tickAudioRef.current;
       void tick?.play().catch(() => {});
-      return true;
-    });
+    }
   };
 
   const handleNextQuestion = () => {
