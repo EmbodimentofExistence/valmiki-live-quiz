@@ -42,6 +42,7 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
   const [timerRunning, setTimerRunning] = useState(false);
   const [timerResetKey, setTimerResetKey] = useState(0);
   const [timerDuration, setTimerDuration] = useState(durations.initial);
+  const [tickMuted, setTickMuted] = useState(false);
   const passAudioRef = useRef<HTMLAudioElement | null>(null);
   const tickAudioRef = useRef<HTMLAudioElement | null>(null);
   const revealAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -77,8 +78,9 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
     const tick = tickAudioRef.current;
     if (!tick) return;
     tick.currentTime = 0;
+    if (tickMuted) return;
     void tick.play().catch(() => {});
-  }, []);
+  }, [tickMuted]);
 
   const playPassSound = useCallback((onEnded?: () => void) => {
     const base = passAudioRef.current;
@@ -135,15 +137,15 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
     }
   };
 
-  const handleTogglePause = () => {
-    if (showAnswer) return;
-    if (timerRunning) {
-      setTimerRunning(false);
-      stopTicking();
+  // Pauses ONLY the ticking audio — the countdown keeps running
+  const handleToggleTickAudio = () => {
+    const tick = tickAudioRef.current;
+    if (tickMuted) {
+      setTickMuted(false);
+      if (!showAnswer && timerRunning) void tick?.play().catch(() => {});
     } else {
-      setTimerRunning(true);
-      const tick = tickAudioRef.current;
-      void tick?.play().catch(() => {});
+      setTickMuted(true);
+      tick?.pause();
     }
   };
 
@@ -228,9 +230,9 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
                 />
 
                 <div className="flex gap-3">
-                  <Button variant="outline" onClick={handleTogglePause} disabled={showAnswer}>
-                    {timerRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                    {timerRunning ? "Pause" : "Resume"}
+                  <Button variant="outline" onClick={handleToggleTickAudio}>
+                    {tickMuted ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+                    {tickMuted ? "Resume Sound" : "Pause Sound"}
                   </Button>
                   <Button variant="outline" onClick={handlePass} disabled={showAnswer}>
                     <FastForward className="w-4 h-4" />
