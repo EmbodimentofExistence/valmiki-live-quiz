@@ -78,8 +78,9 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
     const tick = tickAudioRef.current;
     if (!tick) return;
     tick.currentTime = 0;
+    if (tickMuted) return;
     void tick.play().catch(() => {});
-  }, []);
+  }, [tickMuted]);
 
   const playPassSound = useCallback((onEnded?: () => void) => {
     const base = passAudioRef.current;
@@ -229,9 +230,9 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
                 />
 
                 <div className="flex gap-3">
-                  <Button variant="outline" onClick={handleTogglePause} disabled={showAnswer}>
-                    {timerRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                    {timerRunning ? "Pause" : "Resume"}
+                  <Button variant="outline" onClick={handleToggleTickAudio}>
+                    {tickMuted ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+                    {tickMuted ? "Resume Sound" : "Pause Sound"}
                   </Button>
                   <Button variant="outline" onClick={handlePass} disabled={showAnswer}>
                     <FastForward className="w-4 h-4" />
