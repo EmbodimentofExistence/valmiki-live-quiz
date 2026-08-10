@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Eye, EyeOff, SkipForward, FastForward, Check, Pause, Play } from "lucide-react";
 import { getQuestions } from "@/data/questions";
 
-import passSound from "@/assets/pass-sound.mp3.asset.json";
-import tickSound from "@/assets/clock-tick-1min.mp3.asset.json";
-import revealSound from "@/assets/reveal-sound.mp3.asset.json";
+// Served from /public so they work on any host (Lovable, Vercel, etc.)
+const passSoundUrl = "/sounds/pass-sound.mp3";
+const tickSoundUrl = "/sounds/clock-tick-1min.mp3";
+const revealSoundUrl = "/sounds/reveal-sound.mp3";
 
 function getDurations(subjectId: string) {
   return subjectId === "maths-iq"
