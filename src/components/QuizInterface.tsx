@@ -48,18 +48,18 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
 
   // Preload audio up-front so playback starts instantly (no buffering delay)
   useEffect(() => {
-    const tick = new Audio(tickSound.url);
+    const tick = new Audio(tickSoundUrl);
     tick.loop = true;
     tick.preload = "auto";
     tick.load();
     tickAudioRef.current = tick;
 
-    const pass = new Audio(passSound.url);
+    const pass = new Audio(passSoundUrl);
     pass.preload = "auto";
     pass.load();
     passAudioRef.current = pass;
 
-    const reveal = new Audio(revealSound.url);
+    const reveal = new Audio(revealSoundUrl);
     reveal.preload = "auto";
     reveal.load();
     revealAudioRef.current = reveal;
@@ -83,7 +83,7 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
   const playPassSound = useCallback((onEnded?: () => void) => {
     const base = passAudioRef.current;
     // Play a fresh clone each time so overlapping/repeat triggers always fire
-    const audio = base ? (base.cloneNode(true) as HTMLAudioElement) : new Audio(passSound.url);
+    const audio = base ? (base.cloneNode(true) as HTMLAudioElement) : new Audio(passSoundUrl);
     base?.pause();
     let done = false;
     const finish = () => {
