@@ -137,15 +137,14 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
 
   const handleTogglePause = () => {
     if (showAnswer) return;
-    setTimerRunning((running) => {
-      if (running) {
-        stopTicking();
-        return false;
-      }
+    if (timerRunning) {
+      setTimerRunning(false);
+      stopTicking();
+    } else {
+      setTimerRunning(true);
       const tick = tickAudioRef.current;
       void tick?.play().catch(() => {});
-      return true;
-    });
+    }
   };
 
   const handleNextQuestion = () => {
