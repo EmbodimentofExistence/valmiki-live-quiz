@@ -42,6 +42,7 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
   const [timerRunning, setTimerRunning] = useState(false);
   const [timerResetKey, setTimerResetKey] = useState(0);
   const [timerDuration, setTimerDuration] = useState(durations.initial);
+  const [tickMuted, setTickMuted] = useState(false);
   const passAudioRef = useRef<HTMLAudioElement | null>(null);
   const tickAudioRef = useRef<HTMLAudioElement | null>(null);
   const revealAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -135,15 +136,15 @@ export function QuizInterface({ subjectId, subjectName, onBack, answeredIds, onM
     }
   };
 
-  const handleTogglePause = () => {
-    if (showAnswer) return;
-    if (timerRunning) {
-      setTimerRunning(false);
-      stopTicking();
+  // Pauses ONLY the ticking audio — the countdown keeps running
+  const handleToggleTickAudio = () => {
+    const tick = tickAudioRef.current;
+    if (tickMuted) {
+      setTickMuted(false);
+      if (!showAnswer && timerRunning) void tick?.play().catch(() => {});
     } else {
-      setTimerRunning(true);
-      const tick = tickAudioRef.current;
-      void tick?.play().catch(() => {});
+      setTickMuted(true);
+      tick?.pause();
     }
   };
 
